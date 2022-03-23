@@ -8,7 +8,8 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static("public"));
 mongoose.connect("mongodb://localhost:27017/NameDB");
 const nameSchema = new mongoose.Schema({
-  name: String
+  name: String,
+  meaning: String
 });
 const Name = mongoose.model("Name",nameSchema);
 
@@ -32,9 +33,48 @@ app.post("/names",function(req,res){
     }
   });
 });
-app.delete("/names/:enteredname",function(req,res){
-  console.log(req.params.enteredname);
-  Name.deleteOne({name: req.params.enteredname},function(err){
+app.delete("/names/",function(req,res){
+  // console.log(req.params.enteredname);
+  Name.deleteMany({},function(err){
+    if(!err){
+      res.send("success");
+    }
+    else{
+      res.send(err);
+    }
+  });
+});
+app.get("/names/:enteredName",function(req,res){
+  Name.find({name: req.params.enteredName},function(err,output){
+    if(output){
+      res.send(output);
+    }
+  });
+});
+app.put("/names/:enteredName",function(req,res){
+  Name.updateOne({name: req.params.enteredName}, {name:req.body.name},{oldEnough: true},function(err){
+    if(!err){
+      res.send("Success updated please check get method for updated data");
+    }
+  });
+});
+app.patch("/names/:enteredName",function(req,res){
+Name.updateOne(
+  {name: req.params.enteredName},
+  {$set: req.body},
+  function(err){
+    if(!err){
+      res.send("success");
+    }
+    else{
+      res.send(err);
+    }
+  }
+)
+});
+app.delete("/names/:enteredName",function(req,res){
+  // console.log(req.params.enteredname);
+  Name.deleteOne({name:req.params.enteredName},function(err){
     if(!err){
       res.send("success");
     }
